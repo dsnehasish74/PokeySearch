@@ -3,14 +3,16 @@ import axios from "axios";
 import "./App.css";
 import InfiniteScroll from "react-infinite-scroll-component";
 function App() {
-  const [pokeMons, setPokeymons] = useState([]);
-  const [showingList, setShowingList] = useState([]);
-  const [searchList, setSearchList] = useState([]);
-  const [next, setNext] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
-  const [types, setTypes] = useState([]);
-  const [selectedType, setSelectedType] = useState("All");
+  const [pokeMons, setPokeymons] = useState([]); //Will store all pokeymons which are fetched
+  const [showingList, setShowingList] = useState([]); //will show all the pokeymons which should be shown
+  const [searchList, setSearchList] = useState([]); //will store all suggestions
+  const [next, setNext] = useState(""); //to store the next page url
+  const [searchValue, setSearchValue] = useState(""); //Will store value of Search bar
+  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false); // boolean to se is auto suggestion open or close
+  const [types, setTypes] = useState([]); //Will store all the types available
+  const [selectedType, setSelectedType] = useState("All"); //Will Stor the Type of Pokeymon Selected
+
+  //Works at the begining when website renders Will store all the pokeymon names and types
   useEffect(() => {
     axios.get("https://pokeapi.co/api/v2/pokemon").then((data) => {
       let results = [];
@@ -25,15 +27,23 @@ function App() {
       setTypes(results);
     });
   }, []);
+
+  //Will Create suggestion List
   useEffect(() => {
     const timeOut = setTimeout(() => {
-      setIsSuggestionOpen(true);
+      if (searchValue.length > 0) {
+        setIsSuggestionOpen(true);
+      } else {
+        setIsSuggestionOpen(false);
+      }
       let suggestList = pokeMons.filter((p) => p.includes(searchValue));
       setSearchList(suggestList);
     }, 250);
-
+    //Clean up Function
     return () => clearTimeout(timeOut);
   }, [searchValue, pokeMons]);
+
+  //Will Listen for Enter Press
   const listener = (e) => {
     if (e.key === "Enter") {
       setIsSuggestionOpen(false);
@@ -41,11 +51,13 @@ function App() {
       setShowingList(searchedList);
     }
   };
+
   const handelChange = (e) => {
     console.log(e.target.value);
     setSearchValue(e.target.value);
   };
 
+  // Handel filter
   const getFilteredPokeymon = (e) => {
     setSelectedType(e.target.value);
     console.log(e.target.value);
@@ -61,7 +73,7 @@ function App() {
         });
     }
   };
-
+  //Handel InfiniteScroll
   const fetchMoreData = () => {
     if (next != null && selectedType === "All") {
       axios.get(next).then((data) => {
